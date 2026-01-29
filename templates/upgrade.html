@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Апгрейд{% endblock %}
+{% block header %}Апгрейд{% endblock %}
+
+{% block content %}
+  <section class="upgrade-grid">
+    <div class="panel">
+      <div class="panel-header">
+        <h2>Ваши предметы</h2>
+      </div>
+      <div class="upgrade-list" id="upgrade-items">
+        {% for item, skin in inventory_items %}
+          <div class="skin-card upgrade-card rarity-{{ skin.rarity | lower }}" data-item-id="{{ item.id }}" data-price="{{ item.price_snapshot }}">
+            <div class="skin-visual">
+              <img src="{{ skin.image_url }}" alt="{{ skin.name }}" />
+            </div>
+            <div class="skin-info">
+              <div class="skin-name">{{ skin.name }}</div>
+              <div class="skin-quality">{{ skin.quality }}</div>
+              <div class="skin-price">{{ item.price_snapshot }}★</div>
+            </div>
+          </div>
+        {% else %}
+          <div class="empty">Нет предметов для апгрейда.</div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="panel upgrade-target" id="upgrade-target-panel">
+      <div class="panel-header">
+        <h2>Цель</h2>
+      </div>
+      <div class="skin-card upgrade-card upgrade-target-card" id="upgrade-target">
+        <div class="skin-visual">
+          <img id="target-image" src="{{ url_for('static', filename='img/up.png') }}" alt="target" />
+        </div>
+        <div class="skin-info">
+          <div class="skin-name" id="target-name">—</div>
+          <div class="skin-quality" id="target-quality">—</div>
+          <div class="skin-price" id="target-price">—</div>
+          <div class="target-chance" id="target-chance">Шанс: —</div>
+        </div>
+        <div class="target-result" id="target-result"></div>
+      </div>
+      <div class="target-actions">
+        <button class="btn ghost" id="upgrade-pick">Изменить</button>
+        <button class="btn primary" id="upgrade-attempt">Апгрейд</button>
+      </div>
+    </div>
+  </section>
+{% endblock %}
+
+{% block scripts %}
+  <script>
+    window.UpgradePickUrl = "{{ url_for('upgrade_pick_target') }}";
+    window.UpgradeAttemptUrl = "{{ url_for('upgrade_attempt') }}";
+  </script>
+{% endblock %}

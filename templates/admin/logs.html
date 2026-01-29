@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Логи{% endblock %}
+{% block header %}Логи{% endblock %}
+
+{% block content %}
+  <section class="panel">
+    <div class="panel-header">
+      <h2>Логи событий</h2>
+    </div>
+    <form class="form inline-form" method="get" action="{{ url_for('admin_logs') }}">
+      <label>
+        Поиск
+        <input type="text" name="q" value="{{ current_filters.q }}" placeholder="Текст" />
+      </label>
+      <label>
+        Тип
+        <select name="type">
+          <option value="">Все</option>
+          {% for t in event_types %}
+            <option value="{{ t }}" {% if current_filters.type == t %}selected{% endif %}>{{ t }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>
+        Пользователь
+        <input type="text" name="user" value="{{ current_filters.user }}" placeholder="id или username" />
+      </label>
+      <button class="btn ghost" type="submit">Применить</button>
+    </form>
+
+    <div class="table">
+      <div class="table-row table-head">
+        <div>Время</div>
+        <div>Тип</div>
+        <div>Актор</div>
+        <div>Цель</div>
+        <div>Δ баланс</div>
+        <div>Δ пул</div>
+        <div>Сообщение</div>
+      </div>
+      {% for entry in logs %}
+        <div class="table-row">
+          <div>{{ entry.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</div>
+          <div>{{ entry.event_type }}</div>
+          <div>
+            {% set actor = users_by_id.get(entry.actor_user_id) %}
+            {% if actor %}@{{ actor.username }}{% else %}—{% endif %}
+          </div>
+          <div>
+            {% set target = users_by_id.get(entry.target_user_id) %}
+            {% if target %}@{{ target.username }}{% else %}—{% endif %}
+          </div>
+          <div class="{% if entry.delta_balance >= 0 %}positive{% else %}negative{% endif %}">{{ entry.delta_balance }}</div>
+          <div class="{% if entry.delta_pool_count >= 0 %}positive{% else %}negative{% endif %}">{{ entry.delta_pool_count }}</div>
+          <div>{{ entry.message }}</div>
+        </div>
+      {% else %}
+        <div class="empty">Событий нет.</div>
+      {% endfor %}
+    </div>
+
+    {% set start = (page - 1) * per_page + 1 if total > 0 else 0 %}
+    {% set end = (page * per_page) if (page * per_page) < total else total %}
+    <div class="table-footer">
+      <div class="muted">Показано {{ start }}–{{ end }} из {{ total }}</div>
+      <div class="pagination">
+        <a class="btn ghost" href="{{ prev_url if prev_url else '#' }}" {% if not prev_url %}aria-disabled="true"{% endif %}>Назад</a>
+        <span class="muted">Стр. {{ page }} / {{ pages }}</span>
+        <a class="btn ghost" href="{{ next_url if next_url else '#' }}" {% if not next_url %}aria-disabled="true"{% endif %}>Вперёд</a>
+      </div>
+    </div>
+  </section>
+{% endblock %}

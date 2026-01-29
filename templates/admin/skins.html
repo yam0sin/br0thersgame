@@ -1,0 +1,333 @@
+{% extends "base.html" %}
+{% block title %}Скины{% endblock %}
+{% block header %}Скины{% endblock %}
+
+{% set qualities = [
+  "Прямо с завода",
+  "Немного поношенное",
+  "После полевых испытаний",
+  "Поношенное",
+  "Закалённое в боях"
+] %}
+
+{% set total_pages = (total + per_page - 1) // per_page %}
+{% set start_index = 0 %}
+{% set end_index = 0 %}
+{% if total > 0 %}
+  {% set start_index = (page - 1) * per_page + 1 %}
+  {% set end_index = [page * per_page, total]|min %}
+{% endif %}
+
+{% block content %}
+  <section class="panel">
+    <div class="panel-header">
+      <h2>Добавить скин</h2>
+    </div>
+    <form class="form grid-form" method="post">
+      <label>
+        Оружие
+        <input id="weapon-input" type="text" name="weapon" list="weapon-list" placeholder="AK-47" />
+      </label>
+      <label>
+        Скин
+        <input id="pattern-input" type="text" name="pattern" list="pattern-list" placeholder="Африканская сетка" />
+      </label>
+      <label>
+        Качество
+        <select name="quality" required>
+          {% for quality in qualities %}
+            <option value="{{ quality }}">{{ quality }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>
+        Редкость
+        <select name="rarity" required>
+          {% for rarity in rarities %}
+            <option value="{{ rarity }}">{{ rarity }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>
+        Ссылка на изображение
+        <input type="text" name="image_url" placeholder="/static/img/..." required />
+      </label>
+      <label>
+        Цена
+        <input type="number" name="price" min="0" required />
+      </label>
+      <label>
+        Количество
+        <input type="number" name="count" min="0" required />
+      </label>
+      <button class="btn primary" type="submit">Добавить</button>
+    </form>
+    <datalist id="weapon-list">
+      {% for weapon in weapons %}
+        <option value="{{ weapon }}"></option>
+      {% endfor %}
+    </datalist>
+    <datalist id="pattern-list"></datalist>
+  </section>
+
+  <section class="panel">
+    <div class="panel-header">
+      <h2>Фильтры и сортировка</h2>
+    </div>
+    <form class="form grid-form" method="get">
+      <label>
+        Поиск
+        <input type="text" name="q" value="{{ q }}" placeholder="AK-47 | ..." />
+      </label>
+      <label>
+        Оружие
+        <select name="weapon">
+          <option value="">Все</option>
+          {% for weapon in weapons %}
+            <option value="{{ weapon }}" {% if weapon == weapon_filter %}selected{% endif %}>{{ weapon }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>
+        Качество
+        <select name="quality">
+          <option value="">Все</option>
+          {% for quality in quality_values %}
+            <option value="{{ quality }}" {% if quality == quality_filter %}selected{% endif %}>{{ quality }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>
+        Редкость
+        <select name="rarity">
+          <option value="">Все</option>
+          {% for rarity in rarities %}
+            <option value="{{ rarity }}" {% if rarity == rarity_filter %}selected{% endif %}>{{ rarity }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>
+        Сортировка
+        <select name="sort">
+          <option value="id" {% if sort_key == "id" %}selected{% endif %}>ID</option>
+          <option value="name" {% if sort_key == "name" %}selected{% endif %}>Название</option>
+          <option value="price" {% if sort_key == "price" %}selected{% endif %}>Цена</option>
+          <option value="count" {% if sort_key == "count" %}selected{% endif %}>Количество</option>
+        </select>
+      </label>
+      <label>
+        Порядок
+        <select name="order">
+          <option value="desc" {% if sort_order == "desc" %}selected{% endif %}>DESC</option>
+          <option value="asc" {% if sort_order == "asc" %}selected{% endif %}>ASC</option>
+        </select>
+      </label>
+      <label class="checkbox">
+        <input type="checkbox" name="in_stock" value="1" {% if in_stock == "1" %}checked{% endif %} />
+        Только в наличии
+      </label>
+      <button class="btn ghost" type="submit">Применить</button>
+    </form>
+  </section>
+
+  <section class="panel">
+    <div class="panel-header row-between">
+      <h2>Список скинов</h2>
+      <div class="panel-hint">Показано {{ start_index }}–{{ end_index }} из {{ total }}</div>
+    </div>
+    <div class="table">
+      <div class="table-row table-head">
+        <div>Оружие</div>
+        <div>Скин</div>
+        <div>Качество</div>
+        <div>Редкость</div>
+        <div>Изображение</div>
+        <div>Цена</div>
+        <div>Количество</div>
+        <div>Действия</div>
+      </div>
+      {% for skin in skins %}
+        {% set parts = skin.name.split(" | ", 1) %}
+        {% if parts|length == 2 %}
+          {% set weapon_value = parts[0] %}
+          {% set pattern_value = parts[1] %}
+        {% else %}
+          {% set weapon_value = "(без оружия)" %}
+          {% set pattern_value = skin.name %}
+        {% endif %}
+        <form
+          class="table-row skin-row"
+          method="post"
+          action="{{ url_for('admin_skins_update', skin_id=skin.id) }}"
+          data-weapon="{{ weapon_value }}"
+          data-pattern="{{ pattern_value }}"
+          data-quality="{{ skin.quality }}"
+          data-rarity="{{ skin.rarity }}"
+          data-image="{{ skin.image_url }}"
+          data-price="{{ skin.price }}"
+          data-count="{{ skin.count }}"
+        >
+          <div>
+            <div class="view-field">{{ weapon_value }}</div>
+            <input
+              class="edit-field"
+              type="text"
+              name="weapon"
+              value="{{ weapon_value }}"
+              list="weapon-list"
+              data-pattern-list="pattern-list-{{ skin.id }}"
+            />
+          </div>
+          <div>
+            <div class="view-field">{{ pattern_value }}</div>
+            <input
+              class="edit-field"
+              type="text"
+              name="pattern"
+              value="{{ pattern_value }}"
+              list="pattern-list-{{ skin.id }}"
+            />
+            <datalist id="pattern-list-{{ skin.id }}">
+              {% for option in patterns_by_weapon.get(weapon_value, []) %}
+                <option value="{{ option }}"></option>
+              {% endfor %}
+            </datalist>
+          </div>
+          <div>
+            <div class="view-field">{{ skin.quality }}</div>
+            <select class="edit-field" name="quality" required>
+              {% if skin.quality not in qualities %}
+                <option value="{{ skin.quality }}" selected>{{ skin.quality }}</option>
+              {% endif %}
+              {% for quality in qualities %}
+                <option value="{{ quality }}" {% if quality == skin.quality %}selected{% endif %}>{{ quality }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div>
+            <div class="view-field">{{ skin.rarity }}</div>
+            <select class="edit-field" name="rarity" required>
+              {% for rarity in rarities %}
+                <option value="{{ rarity }}" {% if rarity == skin.rarity %}selected{% endif %}>{{ rarity }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div>
+            <div class="view-field img-cell">
+              {% if skin.image_url %}
+                <img class="img-thumb" src="{{ skin.image_url }}" alt="preview" />
+                <a class="btn ghost btn-xs" href="{{ skin.image_url }}" target="_blank" rel="noopener noreferrer">Открыть</a>
+              {% else %}
+                <span class="muted">—</span>
+              {% endif %}
+            </div>
+            <input class="edit-field" type="text" name="image_url" value="{{ skin.image_url }}" required />
+          </div>
+          <div>
+            <div class="view-field">{{ skin.price }}</div>
+            <input class="edit-field" type="number" name="price" value="{{ skin.price }}" min="0" required />
+          </div>
+          <div>
+            <div class="view-field">{{ skin.count }}</div>
+            <input class="edit-field" type="number" name="count" value="{{ skin.count }}" min="0" required />
+          </div>
+          <div class="row-actions">
+            <button class="btn ghost view-field js-edit" type="button">Изменить</button>
+            <button class="btn ghost edit-field" type="submit">Сохранить</button>
+            <button class="btn ghost edit-field js-cancel" type="button">Отмена</button>
+            <button
+              class="btn danger"
+              type="submit"
+              formaction="{{ url_for('admin_skins_delete', skin_id=skin.id) }}"
+              formmethod="post"
+            >
+              Удалить
+            </button>
+          </div>
+        </form>
+      {% else %}
+        <div class="empty">Скинов пока нет.</div>
+      {% endfor %}
+    </div>
+
+    {% if total_pages > 1 %}
+      <div class="pagination">
+        <a
+          class="btn ghost {% if page <= 1 %}disabled{% endif %}"
+          href="?q={{ q }}&weapon={{ weapon_filter }}&quality={{ quality_filter }}&rarity={{ rarity_filter }}&in_stock={{ in_stock }}&sort={{ sort_key }}&order={{ sort_order }}&page={{ page - 1 }}"
+        >
+          Назад
+        </a>
+        <div class="page-info">Страница {{ page }} из {{ total_pages }}</div>
+        <a
+          class="btn ghost {% if page >= total_pages %}disabled{% endif %}"
+          href="?q={{ q }}&weapon={{ weapon_filter }}&quality={{ quality_filter }}&rarity={{ rarity_filter }}&in_stock={{ in_stock }}&sort={{ sort_key }}&order={{ sort_order }}&page={{ page + 1 }}"
+        >
+          Вперёд
+        </a>
+      </div>
+    {% endif %}
+  </section>
+
+  <script>
+    window.Weapons = {{ weapons | tojson }};
+    window.PatternsByWeapon = {{ patterns_by_weapon | tojson }};
+
+    function rebuildPatternList(listId, weaponValue) {
+      const list = document.getElementById(listId);
+      if (!list) return;
+      list.innerHTML = "";
+      const patterns = (window.PatternsByWeapon && window.PatternsByWeapon[weaponValue]) || [];
+      patterns.forEach((pattern) => {
+        const option = document.createElement("option");
+        option.value = pattern;
+        list.appendChild(option);
+      });
+    }
+
+    function toggleRow(row, isEditing) {
+      if (!row) return;
+      if (isEditing) {
+        row.classList.add("editing");
+      } else {
+        row.classList.remove("editing");
+        row.querySelector("input[name='weapon']").value = row.dataset.weapon || "";
+        row.querySelector("input[name='pattern']").value = row.dataset.pattern || "";
+        row.querySelector("select[name='quality']").value = row.dataset.quality || "";
+        row.querySelector("select[name='rarity']").value = row.dataset.rarity || "";
+        row.querySelector("input[name='image_url']").value = row.dataset.image || "";
+        row.querySelector("input[name='price']").value = row.dataset.price || "";
+        row.querySelector("input[name='count']").value = row.dataset.count || "";
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const addWeapon = document.getElementById("weapon-input");
+      if (addWeapon) {
+        rebuildPatternList("pattern-list", addWeapon.value);
+        addWeapon.addEventListener("input", () => {
+          rebuildPatternList("pattern-list", addWeapon.value);
+        });
+      }
+
+      document.querySelectorAll(".skin-row").forEach((row) => {
+        const weaponInput = row.querySelector("input[name='weapon']");
+        const listId = weaponInput ? weaponInput.dataset.patternList : null;
+        if (weaponInput && listId) {
+          rebuildPatternList(listId, weaponInput.value);
+          weaponInput.addEventListener("input", () => {
+            rebuildPatternList(listId, weaponInput.value);
+          });
+        }
+        const editBtn = row.querySelector(".js-edit");
+        const cancelBtn = row.querySelector(".js-cancel");
+        if (editBtn) {
+          editBtn.addEventListener("click", () => toggleRow(row, true));
+        }
+        if (cancelBtn) {
+          cancelBtn.addEventListener("click", () => toggleRow(row, false));
+        }
+      });
+    });
+  </script>
+{% endblock %}

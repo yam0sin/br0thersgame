@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Пополнить{% endblock %}
+{% block header %}Пополнить{% endblock %}
+
+{% block content %}
+  <section class="panel narrow">
+    <h2>Пополнение промокодом</h2>
+    <form class="form" method="post">
+      <label>
+        Промокод
+        <input type="text" name="code" required />
+      </label>
+      <button class="btn primary" type="submit">Применить</button>
+    </form>
+  </section>
+{% endblock %}

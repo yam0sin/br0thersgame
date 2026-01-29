@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}Главная{% endblock %}
+{% block header %}Главная{% endblock %}
+
+{% block content %}
+  <section class="panel drops-panel">
+    <div class="panel-header panel-header-row">
+      <h2>Лента последних дропов</h2>
+    </div>
+    <div class="drops-carousel">
+      <div class="drops-scroller">
+        {% for drop, user, skin in last_drops %}
+          <div class="drop-card rarity-{{ drop.rarity_snapshot | lower }}">
+            {% if skin and skin.image_url %}
+              <img src="{{ skin.image_url }}" alt="{{ drop.skin_name_snapshot }}" />
+            {% else %}
+              <div class="drop-thumb-placeholder"></div>
+            {% endif %}
+          </div>
+        {% else %}
+          <div class="empty">Дропов нет.</div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <section class="panel roulette-panel">
+    <div class="panel-header row-between">
+      <h2>Прокрутка</h2>
+      <div class="panel-hint">Результат фиксируется в инвентаре</div>
+    </div>
+    <div class="roulette-wrap" id="roulette-wrap">
+      <div class="roulette-track" id="roulette-track">
+        <div class="roulette-placeholder"></div>
+      </div>
+      <div class="roulette-marker"></div>
+    </div>
+  </section>
+
+  <section class="grid-two case-chat">
+    <div class="case-card case-card-skin">
+      <div class="case-main case-main-centered">
+        <div class="case-visual">
+          <img src="{{ url_for('static', filename='img/case.png') }}" alt="case" />
+        </div>
+        {% if current_user.is_authenticated %}
+          <button class="btn primary price-btn case-open-btn" id="open-case-btn">
+            Открыть
+            <span class="price-badge">{{ case_price }}★</span>
+          </button>
+        {% else %}
+          <a class="btn primary price-btn case-open-btn" href="{{ url_for('login') }}">
+            Войти чтобы открыть
+            <span class="price-badge">{{ case_price }}★</span>
+          </a>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <h2>Чат</h2>
+      </div>
+      <div class="chat-window" id="chat-window">
+        {% for msg in chat_messages %}
+          <div class="chat-item" data-id="{{ msg.id }}">
+            <span class="chat-user">@{{ msg.username_snapshot }}</span>
+            <span class="chat-text">{{ msg.message }}</span>
+          </div>
+        {% else %}
+          <div class="empty">Сообщений пока нет.</div>
+        {% endfor %}
+      </div>
+      {% if current_user.is_authenticated %}
+        <form class="chat-form" id="chat-form">
+          <input type="text" name="message" placeholder="Ваше сообщение" maxlength="500" required />
+          <button class="btn ghost" type="submit">Отправить</button>
+        </form>
+      {% else %}
+        <div class="empty">Войдите, чтобы писать в чат.</div>
+      {% endif %}
+    </div>
+  </section>
+
+  <div class="modal-overlay" id="drop-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Ваш дроп</h3>
+        <button class="modal-close" id="modal-close">×</button>
+      </div>
+      <div class="modal-body" id="modal-body">
+        <div class="modal-image"></div>
+        <div class="modal-info">
+          <div class="modal-name">—</div>
+          <div class="modal-quality">—</div>
+          <div class="modal-price">—</div>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn ghost" id="sell-btn">Продать</button>
+        <button class="btn primary" id="keep-btn">Оставить</button>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+  <script>
+    window.SkinsData = {{ skins_data | tojson }};
+    window.OpenCaseUrl = "{{ url_for('open_case') }}";
+    window.SellUrlBase = "{{ url_for('sell_item', item_id=0) }}";
+    window.ChatSendUrl = "{{ url_for('chat_send') }}";
+    window.ChatPollUrl = "{{ url_for('chat_poll') }}";
+  </script>
+{% endblock %}

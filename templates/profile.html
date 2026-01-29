@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}Профиль{% endblock %}
+{% block header %}Профиль{% endblock %}
+
+{% block content %}
+  <section class="profile-header">
+    <div class="profile-avatar">
+      <img
+        src="{% if current_user.avatar_path %}{{ url_for('static', filename=current_user.avatar_path) }}{% else %}{{ url_for('static', filename='img/default-avatar.svg') }}{% endif %}"
+        alt="avatar"
+      />
+      <form class="avatar-form" method="post" enctype="multipart/form-data">
+        <label class="btn ghost">
+          Загрузить
+          <input type="file" name="avatar" accept=".jpg,.jpeg,.png,.webp" />
+        </label>
+        <button class="btn primary" type="submit">Обновить</button>
+      </form>
+    </div>
+    <div class="profile-meta">
+      <div class="profile-username">@{{ current_user.username }}</div>
+      <div class="profile-balance">Баланс: {{ current_user.balance }}★</div>
+    </div>
+  </section>
+
+  <nav class="profile-tabs">
+    <a class="tab" href="#inventory">Инвентарь</a>
+    <a class="tab" href="#history">История</a>
+    <a class="tab" href="#stats">Статистика</a>
+  </nav>
+
+  <section id="inventory" class="panel">
+    <div class="panel-header row-between">
+      <h2>Инвентарь</h2>
+      <div class="panel-hint"></div>
+    </div>
+    <div class="inventory-grid">
+      {% for item, skin in inventory_items %}
+        <div class="skin-card rarity-{{ skin.rarity | lower }}">
+          <div class="skin-visual">
+            <img src="{{ skin.image_url }}" alt="{{ skin.name }}" />
+          </div>
+          <div class="skin-info">
+            <div class="skin-name">{{ skin.name }}</div>
+            <div class="skin-quality">{{ skin.quality }}</div>
+            <div class="skin-price">{{ item.price_snapshot }}★</div>
+          </div>
+          {% if item.status == 'owned' %}
+            <div class="skin-actions">
+              <form method="post" action="{{ url_for('sell_item', item_id=item.id) }}">
+                <button class="btn ghost" type="submit">Продать</button>
+              </form>
+              <form method="post" action="{{ url_for('withdraw_item', item_id=item.id) }}">
+                <button class="btn primary" type="submit">Вывод</button>
+              </form>
+            </div>
+          {% endif %}
+        </div>
+      {% else %}
+        <div class="empty">Инвентарь пуст.</div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section id="history" class="panel">
+    <div class="panel-header">
+      <h2>История открытий</h2>
+    </div>
+    <div class="history-list">
+      {% for entry in history %}
+        <div class="history-item">
+          <div class="history-name">{{ entry.skin_name_snapshot }}</div>
+          <div class="history-meta">
+            {{ entry.rarity_snapshot }} · {{ entry.price_snapshot }}★ · {{ entry.created_at.strftime("%Y-%m-%d %H:%M") }}
+          </div>
+        </div>
+      {% else %}
+        <div class="empty">История пуста.</div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section id="stats" class="panel">
+    <div class="panel-header">
+      <h2>Статистика</h2>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Количество открытий</div>
+        <div class="stat-value">{{ stats.openings_count }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Потрачено</div>
+        <div class="stat-value">{{ stats.spent }}★</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Получено по дропам</div>
+        <div class="stat-value">{{ stats.received }}★</div>
+      </div>
+    </div>
+  </section>
+{% endblock %}

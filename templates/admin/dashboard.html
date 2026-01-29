@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Админка{% endblock %}
+{% block header %}Админка{% endblock %}
+
+{% block content %}
+  <section class="panel">
+    <div class="panel-header">
+      <h2>Админ-панель</h2>
+    </div>
+    <div class="admin-grid">
+      <a class="admin-card" href="{{ url_for('admin_users') }}">Пользователи</a>
+      <a class="admin-card" href="{{ url_for('admin_skins') }}">Скины</a>
+      <a class="admin-card" href="{{ url_for('admin_promocodes') }}">Промокоды</a>
+      <a class="admin-card" href="{{ url_for('admin_stats') }}">Статистика</a>
+      <a class="admin-card" href="{{ url_for('admin_withdrawals') }}">Заявки на вывод</a>
+      <a class="admin-card" href="{{ url_for('admin_logs') }}">Логи</a>
+    
+      <form method="post" action="{{ url_for('admin_chat_clear') }}" onsubmit="return confirm('Очистить чат');">
+        <button class="btn danger" type="submit">Очистить чат?</button>
+      </form>
+</div>
+  </section>
+{% endblock %}

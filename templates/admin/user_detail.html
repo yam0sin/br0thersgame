@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}Детали пользователя{% endblock %}
+{% block header %}Детали пользователя{% endblock %}
+
+{% block content %}
+  <section class="panel">
+    <div class="panel-header row-between">
+      <h2>@{{ user.username }}</h2>
+      <form method="post" action="{{ url_for('admin_delete_user', user_id=user.id) }}">
+        <button class="btn danger" type="submit" {% if user.id == current_user.id %}disabled{% endif %}>
+          Удалить пользователя
+        </button>
+      </form>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Количество открытий</div>
+        <div class="stat-value">{{ stats.openings_count }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Потрачено</div>
+        <div class="stat-value">{{ stats.spent }}★</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Получено</div>
+        <div class="stat-value">{{ stats.received }}★</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Итог</div>
+        <div class="stat-value {% if stats.profit >= 0 %}positive{% else %}negative{% endif %}">
+          {% if stats.profit >= 0 %}в плюсе{% else %}в минусе{% endif %} ({{ stats.profit }}★)
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="grid-two">
+    <div class="panel">
+      <div class="panel-header">
+        <h2>Инвентарь</h2>
+      </div>
+      <div class="inventory-grid">
+        {% for item, skin in inventory_items %}
+          <div class="skin-card rarity-{{ skin.rarity | lower }}">
+            <img src="{{ skin.image_url }}" alt="{{ skin.name }}" />
+            <div class="skin-info">
+              <div class="skin-name">{{ skin.name }}</div>
+              <div class="skin-quality">{{ skin.quality }}</div>
+              <div class="skin-price">{{ item.price_snapshot }}★</div>
+              <div class="skin-status">{{ item.status }}</div>
+            </div>
+          </div>
+        {% else %}
+          <div class="empty">Инвентарь пуст.</div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <h2>История открытий</h2>
+      </div>
+      <div class="history-list">
+        {% for entry in history %}
+          <div class="history-item">
+            <div class="history-name">{{ entry.skin_name_snapshot }}</div>
+            <div class="history-meta">
+              {{ entry.rarity_snapshot }} · {{ entry.price_snapshot }}★ · {{ entry.created_at.strftime("%Y-%m-%d %H:%M") }}
+            </div>
+          </div>
+        {% else %}
+          <div class="empty">История пуста.</div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-header">
+      <h2>Заявки на вывод</h2>
+    </div>
+    <div class="table">
+      <div class="table-row table-head">
+        <div>Скин</div>
+        <div>Статус</div>
+        <div>Дата</div>
+      </div>
+      {% for request, item, skin in withdrawals %}
+        <div class="table-row">
+          <div>{{ skin.name }} ({{ item.price_snapshot }}★)</div>
+          <div>{{ request.status }}</div>
+          <div>{{ request.created_at.strftime("%Y-%m-%d %H:%M") }}</div>
+        </div>
+      {% else %}
+        <div class="empty">Заявок нет.</div>
+      {% endfor %}
+    </div>
+  </section>
+{% endblock %}

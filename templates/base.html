@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}Кейсы{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  </head>
+  <body>
+    {% set path = request.path %}
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="brand">
+  <a href="{{ url_for('index') }}" class="brand-logo">
+    <img src="{{ url_for('static', filename='img/logo.png') }}" alt="logo" />
+  </a>
+</div>
+        <nav class="menu">
+          <a
+            class="menu-item {% if path == '/' %}active{% endif %}"
+            href="{{ url_for('index') }}"
+            aria-current="{% if path == '/' %}page{% endif %}"
+          >
+            <span class="menu-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="M4 10.5L12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6h-4v6H5a1 1 0 0 1-1-1z"
+                />
+              </svg>
+            </span>
+            <span class="menu-label">Главная</span>
+          </a>
+
+          {% if current_user.is_authenticated %}
+            <a
+              class="menu-item {% if path.startswith('/profile') %}active{% endif %}"
+              href="{{ url_for('profile') }}"
+              aria-current="{% if path.startswith('/profile') %}page{% endif %}"
+            >
+              <span class="menu-icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4zm0 2c-4.4 0-8 2.2-8 5v2h16v-2c0-2.8-3.6-5-8-5z"
+                  />
+                </svg>
+              </span>
+              <span class="menu-label">Профиль</span>
+            </a>
+            <a
+              class="menu-item {% if path.startswith('/upgrade') %}active{% endif %}"
+              href="{{ url_for('upgrade') }}"
+              aria-current="{% if path.startswith('/upgrade') %}page{% endif %}"
+            >
+              <span class="menu-icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 3l4 4h-3v6h-2V7H8z" />
+                  <path d="M5 13a7 7 0 0 0 14 0h2a9 9 0 0 1-18 0z" />
+                </svg>
+              </span>
+              <span class="menu-label">Апгрейд</span>
+            </a>
+            <a
+              class="menu-item {% if path.startswith('/topup') %}active{% endif %}"
+              href="{{ url_for('topup') }}"
+              aria-current="{% if path.startswith('/topup') %}page{% endif %}"
+            >
+              <span class="menu-icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M3 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2h-5a3 3 0 0 0 0 6h5v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                  <path d="M16 12a1 1 0 1 0 0 .01z" />
+                </svg>
+              </span>
+              <span class="menu-label">Пополнить</span>
+            </a>
+          {% else %}
+            <a
+              class="menu-item {% if path.startswith('/login') %}active{% endif %}"
+              href="{{ url_for('login') }}"
+              aria-current="{% if path.startswith('/login') %}page{% endif %}"
+            >
+              <span class="menu-icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M13 5h6v14h-6v-2h4V7h-4z" />
+                  <path d="M11 7l4 5-4 5v-3H4v-4h7z" />
+                </svg>
+              </span>
+              <span class="menu-label">Вход</span>
+            </a>
+            <a
+              class="menu-item {% if path.startswith('/register') %}active{% endif %}"
+              href="{{ url_for('register') }}"
+              aria-current="{% if path.startswith('/register') %}page{% endif %}"
+            >
+              <span class="menu-icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4zm0 2c-4.4 0-8 2.2-8 5v2h9v-2c0-1.4.6-2.7 1.6-3.7A9.6 9.6 0 0 1 12 14z"
+                  />
+                  <path d="M18 11v-2h2V7h-2V5h-2v2h-2v2h2v2z" />
+                </svg>
+              </span>
+              <span class="menu-label">Регистрация</span>
+            </a>
+          {% endif %}
+
+          {% if current_user.is_authenticated and current_user.is_admin %}
+            <a
+              class="menu-item {% if path.startswith('/admin') %}active{% endif %}"
+              href="{{ url_for('admin_dashboard') }}"
+              aria-current="{% if path.startswith('/admin') %}page{% endif %}"
+            >
+              <span class="menu-icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 3l8 3v6c0 5-3.5 8.5-8 9-4.5-.5-8-4-8-9V6z" />
+                </svg>
+              </span>
+              <span class="menu-label">Админка</span>
+            </a>
+          {% endif %}
+        </nav>
+      </aside>
+      <div class="main">
+        <header class="topbar">
+          <div class="topbar-title">{% block header %}Кейсы{% endblock %}</div>
+          <div class="topbar-user">
+            {% if current_user.is_authenticated %}
+              <div class="user-chip">
+                <img
+                  class="user-avatar"
+                  src="{% if current_user.avatar_path %}{{ url_for('static', filename=current_user.avatar_path) }}{% else %}{{ url_for('static', filename='img/default-avatar.svg') }}{% endif %}"
+                  alt="avatar"
+                />
+                <div class="user-info">
+                  <div class="user-name">{{ current_user.username }}</div>
+                  <div class="user-balance">Баланс: {{ current_user.balance }}★</div>
+                </div>
+              </div>
+              <a class="btn ghost" href="{{ url_for('logout') }}">Выход</a>
+            {% else %}
+              <div class="user-guest">Гость</div>
+            {% endif %}
+          </div>
+        </header>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="flash-stack">
+              {% for category, message in messages %}
+                <div class="flash {{ category }}">{{ message }}</div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        <main class="content">
+          {% block content %}{% endblock %}
+        </main>
+      </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    {% block scripts %}{% endblock %}
+  </body>
+</html>

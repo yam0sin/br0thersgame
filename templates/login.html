@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Вход{% endblock %}
+{% block header %}Вход{% endblock %}
+
+{% block content %}
+  <section class="panel narrow">
+    <h2>Вход</h2>
+    <form class="form" method="post">
+      <label>
+        Логин
+        <input type="text" name="username" required />
+      </label>
+      <label>
+        Пароль
+        <input type="password" name="password" required />
+      </label>
+      <button class="btn primary" type="submit">Войти</button>
+      <div class="form-hint">
+        Нет аккаунта? <a href="{{ url_for('register') }}">Регистрация</a>
+      </div>
+    </form>
+  </section>
+{% endblock %}

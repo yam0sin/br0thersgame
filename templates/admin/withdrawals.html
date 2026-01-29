@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Заявки на вывод{% endblock %}
+{% block header %}Заявки на вывод{% endblock %}
+
+{% block content %}
+  <section class="panel">
+    <div class="panel-header">
+      <h2>Список заявок</h2>
+    </div>
+    <div class="table">
+      <div class="table-row table-head">
+        <div>Пользователь</div>
+        <div>Скин</div>
+        <div>Статус</div>
+        <div>Дата</div>
+        <div>Действие</div>
+      </div>
+      {% for withdrawal, user, item, skin in withdrawals %}
+        <div class="table-row">
+          <div>@{{ user.username }}</div>
+          <div>{{ skin.name }} ({{ item.price_snapshot }}★)</div>
+          <div>{{ withdrawal.status }}</div>
+          <div>{{ withdrawal.created_at.strftime("%Y-%m-%d %H:%M") }}</div>
+          <div>
+            {% if withdrawal.status == 'requested' %}
+              <form method="post">
+                <input type="hidden" name="request_id" value="{{ withdrawal.id }}" />
+                <button class="btn ghost" type="submit">Отметить как выведен</button>
+              </form>
+              <form method="post" action="{{ url_for('admin_withdrawals_sell', request_id=withdrawal.id) }}">
+                <button class="btn danger" type="submit">Продать</button>
+              </form>
+            {% elif withdrawal.status == 'sold_by_admin' %}
+              <span class="muted">Продано админом</span>
+            {% else %}
+              <span class="muted">Завершено</span>
+            {% endif %}
+          </div>
+        </div>
+      {% else %}
+        <div class="empty">Заявок нет.</div>
+      {% endfor %}
+    </div>
+  </section>
+{% endblock %}

@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Статистика{% endblock %}
+{% block header %}Статистика{% endblock %}
+
+{% block content %}
+  <section class="panel">
+    <div class="panel-header">
+      <h2>Скины (пул)</h2>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Всего типов скинов</div>
+        <div class="stat-value">{{ pool_stats.total_types }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Всего единиц в пуле</div>
+        <div class="stat-value">{{ pool_stats.units }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Общая стоимость пула</div>
+        <div class="stat-value">{{ pool_stats.value }}★</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Средняя стоимость (по типам)</div>
+        <div class="stat-value">
+          {% if pool_stats.avg_price is not none %}
+            {{ "%.2f"|format(pool_stats.avg_price) }}★
+          {% else %}
+            —
+          {% endif %}
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Средняя стоимость (взвешенная)</div>
+        <div class="stat-value">
+          {% if pool_stats.weighted_avg is not none %}
+            {{ "%.2f"|format(pool_stats.weighted_avg) }}★
+          {% else %}
+            —
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-header">
+      <h2>Открытия (история)</h2>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Всего открытий</div>
+        <div class="stat-value">{{ drop_stats.total_openings }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Средняя стоимость выбитого</div>
+        <div class="stat-value">
+          {% if drop_stats.avg_drop is not none %}
+            {{ "%.2f"|format(drop_stats.avg_drop) }}★
+          {% else %}
+            —
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </section>
+{% endblock %}

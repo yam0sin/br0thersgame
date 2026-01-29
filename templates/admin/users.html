@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Пользователи{% endblock %}
+{% block header %}Пользователи{% endblock %}
+
+{% block content %}
+  <section class="panel">
+    <div class="panel-header">
+      <h2>Список пользователей</h2>
+    </div>
+    <div class="table">
+      <div class="table-row table-head">
+        <div>Логин</div>
+        <div>Баланс</div>
+        <div>Открытий</div>
+        <div>Потрачено</div>
+        <div>Получено</div>
+        <div>Итог</div>
+        <div>Действие</div>
+      </div>
+      {% for user, stats in users_with_stats %}
+        <div class="table-row">
+          <div>@{{ user.username }}</div>
+          <div>{{ user.balance }}★</div>
+          <div>{{ stats.openings_count }}</div>
+          <div>{{ stats.spent }}★</div>
+          <div>{{ stats.received }}★</div>
+          <div class="{% if stats.profit >= 0 %}positive{% else %}negative{% endif %}">
+            {% if stats.profit >= 0 %}в плюсе{% else %}в минусе{% endif %} ({{ stats.profit }}★)
+          </div>
+          <div class="row-actions">
+            <a class="btn ghost" href="{{ url_for('admin_user_detail', user_id=user.id) }}">Открыть профиль</a>
+            <form method="post" action="{{ url_for('admin_toggle_admin', user_id=user.id) }}">
+              <button class="btn ghost" type="submit" {% if user.id == current_user.id %}disabled{% endif %}>
+                {% if user.is_admin %}Снять админку{% else %}Сделать админом{% endif %}
+              </button>
+            </form>
+            <form method="post" action="{{ url_for('admin_delete_user', user_id=user.id) }}">
+              <button class="btn danger" type="submit" {% if user.id == current_user.id %}disabled{% endif %}>
+                Удалить
+              </button>
+            </form>
+          </div>
+        </div>
+      {% else %}
+        <div class="empty">Пользователей нет.</div>
+      {% endfor %}
+    </div>
+  </section>
+{% endblock %}

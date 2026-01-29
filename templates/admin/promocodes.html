@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}Промокоды{% endblock %}
+{% block header %}Промокоды{% endblock %}
+
+{% block content %}
+  <section class="panel">
+    <div class="panel-header">
+      <h2>Создать промокод</h2>
+    </div>
+    <form class="form grid-form" method="post">
+      <label>
+        Код
+        <input type="text" name="code" required />
+      </label>
+      <label>
+        Сумма
+        <input type="number" name="amount" min="0" required />
+      </label>
+      <label>
+        Лимит использований
+        <input type="number" name="max_uses_total" min="1" required />
+      </label>
+<button class="btn primary" type="submit">Создать</button>
+    </form>
+  </section>
+
+<div class="panel">
+  <div class="panel-header">
+    <h2>Список промокодов</h2>
+  </div>
+
+  <div class="table">
+    <div class="table-row table-head">
+      <div>Код</div>
+      <div>Сумма</div>
+      <div>Лимит</div>
+      <div>Использовано</div>
+      <div>Статус</div>
+      <div>Действия</div>
+    </div>
+
+    {% for promo in promocodes %}
+      <div class="table-row">
+        <div>
+          <a class="link" href="{{ url_for('admin_promocodes') }}?code={{ promo.code }}">{{ promo.code }}</a>
+        </div>
+        <div>{{ promo.amount }}★</div>
+        <div>{{ promo.max_uses_total }}</div>
+        <div>{{ promo.uses_count }}</div>
+        <div>{% if promo.enabled %}активен{% else %}выключен{% endif %}</div>
+
+        <div style="display:flex; gap:10px; justify-content:flex-end;">
+          <form method="post" action="{{ url_for('admin_promocodes_toggle', promo_id=promo.id) }}">
+            <button class="btn ghost" type="submit">
+              {% if promo.enabled %}Деактивировать{% else %}Активировать{% endif %}
+            </button>
+          </form>
+
+          <form method="post"
+                action="{{ url_for('admin_promocodes_delete', promo_id=promo.id) }}"
+                onsubmit="return confirm('Удалить промокод?');">
+            <button class="btn danger" type="submit">Удалить</button>
+          </form>
+        </div>
+      </div>
+    {% else %}
+      <div class="empty">Промокодов нет.</div>
+    {% endfor %}
+  </div>
+</div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <h2>Использования</h2>
+      </div>
+      <div class="table">
+        <div class="table-row table-head">
+          <div>Промокод</div>
+          <div>Пользователь</div>
+          <div>Дата</div>
+        </div>
+        {% for redemption, user, promo in redemptions %}
+          <div class="table-row">
+            <div>{{ promo.code }}</div>
+            <div>@{{ user.username }}</div>
+            <div>{{ redemption.redeemed_at.strftime("%Y-%m-%d %H:%M") }}</div>
+          </div>
+        {% else %}
+          <div class="empty">Использований нет.</div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+{% endblock %}
